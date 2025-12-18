@@ -1,0 +1,6 @@
+@onoff_pt_api_shn_HostAddress = http://localhost:5250
+
+GET {{onoff_pt_api_shn_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
