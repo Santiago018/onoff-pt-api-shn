@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using OnOff.Api.Application.DTOs;
 using OnOff.Api.Domain.Entities;
 using OnOff.Api.Infrastructure.Data;
-using System.Security.Claims;
 
 namespace OnOff.Api.Controllers
 {
@@ -19,21 +18,19 @@ namespace OnOff.Api.Controllers
             _context = context;
         }
 
-
         private Guid GetUserId()
         {
             var userIdClaim = User.Claims.First(c => c.Type == "userId").Value;
             return Guid.Parse(userIdClaim);
         }
 
-
+        // =========================
+        // GET ALL (abierto)
+        // =========================
         [HttpGet]
         public IActionResult GetAll([FromQuery] bool? completed)
         {
-            var userId = GetUserId();
-
-            var query = _context.Tasks
-                .Where(t => t.UserId == userId);
+            var query = _context.Tasks.AsQueryable();
 
             if (completed.HasValue)
                 query = query.Where(t => t.IsCompleted == completed.Value);
@@ -46,35 +43,36 @@ namespace OnOff.Api.Controllers
             return Ok(tasks);
         }
 
-
+        // =========================
+        // CREATE (necesita UserId por FK)
+        // =========================
         [HttpPost]
-        public IActionResult Create(CreateTaskDto dto)
+        public IActionResult Create([FromBody] CreateTaskDto dto)
         {
-            var userId = GetUserId();
+            var userId = GetUserId(); // ✅ para cumplir FK
 
             var task = new TaskItem
             {
                 Id = Guid.NewGuid(),
                 Title = dto.Title,
                 IsCompleted = false,
-                UserId = userId,
+                UserId = userId,          // ✅ CLAVE
                 CreatedAt = DateTime.UtcNow
             };
 
             _context.Tasks.Add(task);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetAll), new { id = task.Id }, task);
+            return Ok(task);
         }
 
-
+        // =========================
+        // UPDATE TITLE (sin filtrar por UserId)
+        // =========================
         [HttpPut("{id}")]
-        public IActionResult Update(Guid id, UpdateTaskDto dto)
+        public IActionResult Update(Guid id, [FromBody] UpdateTaskDto dto)
         {
-            var userId = GetUserId();
-
-            var task = _context.Tasks
-                .FirstOrDefault(t => t.Id == id && t.UserId == userId);
+            var task = _context.Tasks.FirstOrDefault(t => t.Id == id);
 
             if (task == null)
                 return NotFound();
@@ -85,14 +83,13 @@ namespace OnOff.Api.Controllers
             return NoContent();
         }
 
-
+        // =========================
+        // CHANGE STATUS (sin filtrar por UserId)
+        // =========================
         [HttpPut("{id}/status")]
-        public IActionResult ChangeStatus(Guid id, UpdateTaskStatusDto dto)
+        public IActionResult ChangeStatus(Guid id, [FromBody] UpdateTaskStatusDto dto)
         {
-            var userId = GetUserId();
-
-            var task = _context.Tasks
-                .FirstOrDefault(t => t.Id == id && t.UserId == userId);
+            var task = _context.Tasks.FirstOrDefault(t => t.Id == id);
 
             if (task == null)
                 return NotFound();
@@ -103,14 +100,13 @@ namespace OnOff.Api.Controllers
             return NoContent();
         }
 
-
+        // =========================
+        // DELETE (sin filtrar por UserId)
+        // =========================
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id)
         {
-            var userId = GetUserId();
-
-            var task = _context.Tasks
-                .FirstOrDefault(t => t.Id == id && t.UserId == userId);
+            var task = _context.Tasks.FirstOrDefault(t => t.Id == id);
 
             if (task == null)
                 return NotFound();

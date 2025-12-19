@@ -4,10 +4,24 @@ using OnOff.Api.Application.Interfaces;
 using OnOff.Api.Application.Services;
 using System.Text;
 using OnOff.Api.Infrastructure.Logging;
+using Microsoft.EntityFrameworkCore;
+using OnOff.Api.Infrastructure.Data;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 //Logger
 var logPath = Path.Combine(
@@ -22,6 +36,14 @@ builder.Logging.AddProvider(new FileLoggerProvider(logPath));
 
 // Controllers
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    );
+});
+
 
 // Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -55,6 +77,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("AllowAngular");
 
 app.UseAuthentication();
 app.UseAuthorization();

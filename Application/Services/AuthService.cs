@@ -11,6 +11,10 @@ public class AuthService : IAuthService
 {
     private readonly IConfiguration _config;
 
+    // ID REAL del usuario admin en BD
+    private static readonly Guid ADMIN_ID =
+        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+
     public AuthService(IConfiguration config)
     {
         _config = config;
@@ -24,7 +28,7 @@ public class AuthService : IAuthService
 
         var claims = new[]
         {
-            new Claim("userId", Guid.NewGuid().ToString()),
+            new Claim("userId", ADMIN_ID.ToString()),
             new Claim(ClaimTypes.Email, request.Email)
         };
 
