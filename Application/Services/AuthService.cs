@@ -11,7 +11,6 @@ public class AuthService : IAuthService
 {
     private readonly IConfiguration _config;
 
-    // ID REAL del usuario admin en BD
     private static readonly Guid ADMIN_ID =
         Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
@@ -21,8 +20,7 @@ public class AuthService : IAuthService
     }
 
     public LoginResponseDto Login(LoginRequestDto request)
-    {
-        // Login fake (prueba técnica)
+    {     
         if (request.Email != "admin@onoff.com" || request.Password != "123456")
             throw new UnauthorizedAccessException("Credenciales inválidas");
 

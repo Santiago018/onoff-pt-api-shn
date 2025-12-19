@@ -24,9 +24,6 @@ namespace OnOff.Api.Controllers
             return Guid.Parse(userIdClaim);
         }
 
-        // =========================
-        // GET ALL (abierto)
-        // =========================
         [HttpGet]
         public IActionResult GetAll([FromQuery] bool? completed)
         {
@@ -43,20 +40,17 @@ namespace OnOff.Api.Controllers
             return Ok(tasks);
         }
 
-        // =========================
-        // CREATE (necesita UserId por FK)
-        // =========================
         [HttpPost]
         public IActionResult Create([FromBody] CreateTaskDto dto)
         {
-            var userId = GetUserId(); // ✅ para cumplir FK
+            var userId = GetUserId();
 
             var task = new TaskItem
             {
                 Id = Guid.NewGuid(),
                 Title = dto.Title,
                 IsCompleted = false,
-                UserId = userId,          // ✅ CLAVE
+                UserId = userId,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -66,9 +60,6 @@ namespace OnOff.Api.Controllers
             return Ok(task);
         }
 
-        // =========================
-        // UPDATE TITLE (sin filtrar por UserId)
-        // =========================
         [HttpPut("{id}")]
         public IActionResult Update(Guid id, [FromBody] UpdateTaskDto dto)
         {
@@ -83,9 +74,6 @@ namespace OnOff.Api.Controllers
             return NoContent();
         }
 
-        // =========================
-        // CHANGE STATUS (sin filtrar por UserId)
-        // =========================
         [HttpPut("{id}/status")]
         public IActionResult ChangeStatus(Guid id, [FromBody] UpdateTaskStatusDto dto)
         {
@@ -100,9 +88,6 @@ namespace OnOff.Api.Controllers
             return NoContent();
         }
 
-        // =========================
-        // DELETE (sin filtrar por UserId)
-        // =========================
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id)
         {
